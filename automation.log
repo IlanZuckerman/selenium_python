@@ -1,0 +1,46 @@
+02/28/2018 16:36:11 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:36:11
+02/28/2018 16:36:13 - LoginPage - INFO: Element Found: WelcomePage_webadmin id 
+02/28/2018 16:36:14 - LoginPage - INFO: Clicked on element with locator: WelcomePage_webadmin locatorType: id
+02/28/2018 16:36:14 - LoginPage - INFO: Element Found: password id 
+02/28/2018 16:36:14 - LoginPage - INFO: Sent data on element with locator: password locatorType: id
+02/28/2018 16:36:14 - LoginPage - INFO: Element Found: username id 
+02/28/2018 16:36:14 - LoginPage - INFO: Sent data on element with locator: username locatorType: id
+02/28/2018 16:36:14 - LoginPage - INFO: Element Found: //button[@type="submit"] xpath 
+02/28/2018 16:36:14 - LoginPage - INFO: Clicked on element with locator: //button[@type="submit"] locatorType: xpath
+02/28/2018 16:37:52 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:37:52
+02/28/2018 16:37:54 - LoginPage - INFO: Element Found: WelcomePage_webadmin id 
+02/28/2018 16:37:54 - LoginPage - INFO: Clicked on element with locator: WelcomePage_webadmin locatorType: id
+02/28/2018 16:37:54 - LoginPage - INFO: Element Found: password id 
+02/28/2018 16:37:54 - LoginPage - INFO: Sent data on element with locator: password locatorType: id
+02/28/2018 16:37:54 - LoginPage - INFO: Element Found: username id 
+02/28/2018 16:37:54 - LoginPage - INFO: Sent data on element with locator: username locatorType: id
+02/28/2018 16:37:54 - LoginPage - INFO: Element Found: //button[@type="submit"] xpath 
+02/28/2018 16:37:55 - LoginPage - INFO: Clicked on element with locator: //button[@type="submit"] locatorType: xpath
+02/28/2018 16:38:54 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:38:54
+02/28/2018 16:38:56 - LoginPage - INFO: Element Found: WelcomePage_webadmin id 
+02/28/2018 16:38:56 - LoginPage - INFO: Clicked on element with locator: WelcomePage_webadmin locatorType: id
+02/28/2018 16:38:56 - LoginPage - INFO: Element Found: password id 
+02/28/2018 16:38:56 - LoginPage - INFO: Sent data on element with locator: password locatorType: id
+02/28/2018 16:38:56 - LoginPage - INFO: Element Found: username id 
+02/28/2018 16:38:56 - LoginPage - INFO: Sent data on element with locator: username locatorType: id
+02/28/2018 16:38:56 - LoginPage - INFO: Element Found: //button[@type="submit"] xpath 
+02/28/2018 16:38:57 - LoginPage - INFO: Clicked on element with locator: //button[@type="submit"] locatorType: xpath
+02/28/2018 16:41:00 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:41:00
+02/28/2018 16:41:39 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:41:39
+02/28/2018 16:41:41 - LoginPage - INFO: Element Found: WelcomePage_webadmin id 
+02/28/2018 16:41:41 - LoginPage - INFO: Clicked on element with locator: WelcomePage_webadmin locatorType: id
+02/28/2018 16:41:41 - LoginPage - INFO: Element Found: password id 
+02/28/2018 16:41:41 - LoginPage - INFO: Sent data on element with locator: password locatorType: id
+02/28/2018 16:41:41 - LoginPage - INFO: Element Found: username id 
+02/28/2018 16:41:41 - LoginPage - INFO: Sent data on element with locator: username locatorType: id
+02/28/2018 16:41:41 - LoginPage - INFO: Element Found: //button[@type="submit"] xpath 
+02/28/2018 16:41:42 - LoginPage - INFO: Clicked on element with locator: //button[@type="submit"] locatorType: xpath
+02/28/2018 16:42:11 - setUpClass - INFO: going to create file: /tmp/RHV_4_1_Scale_Up/28-02-2018_16:42:11
+02/28/2018 16:42:13 - LoginPage - INFO: Element Found: WelcomePage_webadmin id 
+02/28/2018 16:42:13 - LoginPage - INFO: Clicked on element with locator: WelcomePage_webadmin locatorType: id
+02/28/2018 16:42:13 - LoginPage - INFO: Element Found: password id 
+02/28/2018 16:42:13 - LoginPage - INFO: Sent data on element with locator: password locatorType: id
+02/28/2018 16:42:13 - LoginPage - INFO: Element Found: username id 
+02/28/2018 16:42:13 - LoginPage - INFO: Sent data on element with locator: username locatorType: id
+02/28/2018 16:42:13 - LoginPage - INFO: Element Found: //button[@type="submit"] xpath 
+02/28/2018 16:42:14 - LoginPage - INFO: Clicked on element with locator: //button[@type="submit"] locatorType: xpath
