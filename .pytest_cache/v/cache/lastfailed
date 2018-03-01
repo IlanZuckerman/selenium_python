@@ -1,0 +1,3 @@
+{
+  "tests/home/test_ff.py::TestFF::test_valid_login": true
+}

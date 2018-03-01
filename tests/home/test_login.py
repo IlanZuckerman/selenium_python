@@ -1,59 +1,59 @@
 # pip freeze > requirements.txt
 # pip install -r requirements.txt
-import inspect
-import random
 
-from selenium import webdriver
-import time, os, datetime, logging, unittest
-
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.by import By
-
-from utilities.handy_wrappers import HandyWrappers
-import utilities.custom_logger as cl
+import time, os, datetime, logging, unittest, pytest
 from pages.home.login_page import LoginPage
+from utilities.teststatus import TestStatus
+
+@pytest.mark.usefixtures('oneTimeSetUp', 'setUp')
+class TestLogin(unittest.TestCase):
+
+    # log = cl.customLogger(logging.DEBUG)
+
+    # @classmethod
+    # def setUpClass(cls):
+    #     """
+    #     Run only once per execution
+    #     Create directory tree in /tmp per each test suit execution
+    #     """
+    #     t = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
+    #     cls.suit_run_path = os.path.join('/tmp/RHV_4_1_Scale_Up/', t)
+    #     # log.info ('going to create file: ' + cls.suit_run_path)
+    #     os.makedirs(cls.suit_run_path)
 
 
-class TestFF(unittest.TestCase):
+    # def setUp(self):
+    #     """
+    #     Run once before each test case
+    #     """
+    #     self.lp = LoginPage(self.driver)
 
-    @classmethod
-    def setUpClass(cls):
-        """
-        Run only once per execution
-        Create directory tree in /tmp per each test suit execution
-        """
-        log = cl.customLogger(logging.DEBUG)
-        t = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
-        cls.suit_run_path = os.path.join('/tmp/RHV_4_1_Scale_Up/', t)
-        log.info ('going to create file: ' + cls.suit_run_path)
-        os.makedirs(cls.suit_run_path)
+    @pytest.fixture(autouse=True)
+    def classSetup(self, oneTimeSetUp):
+        self.lp = LoginPage(self.driver)
+        self.ts = TestStatus(self.driver)
 
-
-    def setUp(self):
-        """
-        Run once before each test case
-        """
-        self.profile = webdriver.FirefoxProfile()
-        self.profile.accept_untrusted_certs = True
-        self.driver = webdriver.Firefox(firefox_profile=self.profile)
-        self.driver.implicitly_wait(5)
-        self.driver.maximize_window()
-        self.driver.get('https://vega09.qa.lab.tlv.redhat.com/ovirt-engine/')
-        # self.hw = HandyWrappers(self.driver)
-
-
-    def test_login(self):
+    @pytest.mark.run(order=2)
+    def test_valid_login(self):
         # start_time = self.login()
         # self.hw.measure_time('id-compute', 'id', start_time, 15, self.suit_run_path)
         # self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title, 'Title is not as expected')
 
-        lp = LoginPage(self.driver)
-        lp.login('admin', 'qum5net')
+        self.lp.login('admin', 'qum5net')
+        result1 = self.lp.verifyTitle()
+        self.ts.mark(result1, 'Title Verified')
+        result2 = self.lp.verifyLoginSuccesfull()
+        self.ts.markFinal('test_valid_login', result2, 'Login successful')
         time.sleep(3)
-        self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title, 'Title is not as expected')
-        self.log.info('Successful login')
 
-
+    @pytest.mark.run(order=1)
+    def test_invalid_login(self):
+        self.lp.clickWelcomeAdminField()
+        self.lp.login()
+        result = self.lp.verifyLoginFailed()
+        assert result == True
+        time.sleep(3)
+        # self.log.info('Successful invalid login')
     # def test_create_vm_from_template(self):
     #     lp = LoginPage(self.driver)
     #     lp.login('admin', 'qum5net')
@@ -93,6 +93,6 @@ class TestFF(unittest.TestCase):
     #     self.write_delta_to_csv(self.suit_run_path, inspect.stack()[0][3], delta)
 
 
-    def tearDown(inst):
-        # close the browser window
-        inst.driver.quit()
+    # def tearDown(inst):
+    #     # close the browser window
+    #     inst.driver.quit()

@@ -1,12 +1,6 @@
-from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.common.keys import Keys
-
-from utilities.handy_wrappers import HandyWrappers
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 from base.selenium_driver import SeleniumDriver
 import utilities.custom_logger as cl
-import logging
+import logging, time
 
 class LoginPage(SeleniumDriver):
 
@@ -36,10 +30,25 @@ class LoginPage(SeleniumDriver):
         self.elementClick(self._submit_btn, locatorType='xpath')
 
 
-    def login(self, username, password):
-        # hw = HandyWrappers(self.driver)
-
-        self.clickWelcomeAdminField()
+    def login(self, username='', password=''):
+        # self.clickWelcomeAdminField()
         self.enterPasswordField(password)
         self.enterUsernameField(username)
         self.clickSubmitButton()
+
+    def verifyLoginSuccesfull(self):
+        # self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title, 'Title is not as expected')
+        element = self.waitForElement('id-compute')
+        return element is not None
+
+    def verifyLoginFailed(self):
+        # TODO: convert this to text inside the message
+        result = self.isElementPresent("//div[@class='alert alert-warning alert-dismissable']", 'xpath')
+        return result
+
+    def verifyTitle(self):
+        time.sleep(2)
+        if 'Red Hat Virtualization Manager Web Administration' in self.getTitle():
+            return True
+        else:
+            return False

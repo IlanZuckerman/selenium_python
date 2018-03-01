@@ -65,8 +65,7 @@ class TestFF(unittest.TestCase):
         lp = LoginPage(self.driver)
         lp.login('admin', 'qum5net')
         # time.sleep(3)
-        self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title,
-                      'Title is not as expected')
+
 
 
 
