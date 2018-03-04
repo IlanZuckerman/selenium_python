@@ -1,3 +1,4 @@
 {
-  "tests/home/test_ff.py::TestFF::test_valid_login": true
+  "tests/home/test_ff.py::TestFF::test_valid_login": true,
+  "tests/home/test_login.py::TestLogin::test_valid_login": true
 }

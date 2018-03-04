@@ -51,7 +51,7 @@ class WebDriverFactory():
         # Setting Driver Implicit Time out for An Element
         driver.implicitly_wait(5)
         # Maximize the window
-        driver.maximize_window()
+        # driver.maximize_window()
         # Loading browser with App URL
         driver.get(baseURL)
         return driver

@@ -3,6 +3,7 @@
 
 import time, os, datetime, logging, unittest, pytest
 from pages.home.login_page import LoginPage
+from pages.vms.vms_page import VmsPage
 from utilities.teststatus import TestStatus
 
 @pytest.mark.usefixtures('oneTimeSetUp', 'setUp')
@@ -31,6 +32,7 @@ class TestLogin(unittest.TestCase):
     @pytest.fixture(autouse=True)
     def classSetup(self, oneTimeSetUp):
         self.lp = LoginPage(self.driver)
+        self.vp = VmsPage(self.driver)
         self.ts = TestStatus(self.driver)
 
     @pytest.mark.run(order=2)
@@ -51,13 +53,18 @@ class TestLogin(unittest.TestCase):
         self.lp.clickWelcomeAdminField()
         self.lp.login()
         result = self.lp.verifyLoginFailed()
-        assert result == True
+        self.ts.markFinal('test_invalid_login', result, 'Invalid login went good')
+        # assert result == True
         time.sleep(3)
-        # self.log.info('Successful invalid login')
-    # def test_create_vm_from_template(self):
-    #     lp = LoginPage(self.driver)
-    #     lp.login('admin', 'qum5net')
-    #     time.sleep(5)
+
+    @pytest.mark.run(order=3)
+    def test_create_vm_from_template(self):
+        self.vp.create_new_vm_from_template('1_HDD_Thin')
+        self.vp.search_for_selenium_vms()
+        result = self.vp.validate_vm_created()
+        self.ts.markFinal('test_create_vm_from_template', result, 'vm created successfully')
+        # assert result == True
+
     #     element_to_hover_over = self.driver.find_element_by_id("id-compute")
     #     hover = ActionChains(self.driver).move_to_element(element_to_hover_over)
     #     hover.perform()

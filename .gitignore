@@ -107,3 +107,7 @@ ENV/
 *.iml
 out
 gen
+
+/screenshot/
+/tests/home/.pytest_cache/
+/.pytest_cache/
