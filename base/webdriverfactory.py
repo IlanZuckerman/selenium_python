@@ -37,7 +37,7 @@ class WebDriverFactory():
         Returns:
             'WebDriver Instance'
         """
-        baseURL = "https://vega09.qa.lab.tlv.redhat.com/ovirt-engine/"
+        baseURL = "https://b01-h21-r620.rhev.openstack.engineering.redhat.com"
         if self.browser == "iexplorer":
             # Set ie driver
             driver = webdriver.Ie()

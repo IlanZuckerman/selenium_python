@@ -1,4 +1,3 @@
 {
-  "test_ff.py::TestFF::test_valid_login": true,
-  "test_login.py::TestLogin::test_create_vm_from_template": true
+  "test_ff.py::TestFF::test_valid_login": true
 }

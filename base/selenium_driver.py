@@ -1,6 +1,10 @@
 import inspect, time, os, logging
+
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from traceback import print_stack
+
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
@@ -66,8 +70,20 @@ class SeleniumDriver():
             self.log.info("Element not found: %s %s " % (locator, locatorType))
         return element
 
+    def getElements(self, locator, locatorType="id"):
+        elements = None
+        try:
+            locatorType = locatorType.lower()
+            byType = self.getByType(locatorType)
+            elements = self.driver.find_elements(byType, locator)
+            self.log.info("Element Found: %s %s " % (locator, locatorType))
+        except:
+            self.log.info("Element not found: %s %s " % (locator, locatorType))
+        return elements
+
 
     def elementClick(self, locator, locatorType="id"):
+        tmp = self.waitForElement(locator, locatorType)
         try:
             element = self.getElement(locator, locatorType)
             element.click()
@@ -76,9 +92,23 @@ class SeleniumDriver():
             self.log.info("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
 
+    def elementClickShift(self, locator, locatorType="id"):
+        # TODO: add a step to check if line already selected, and select it only if its not.
+        try:
+            elem = self.getElement(locator, locatorType)
+            ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
+            time.sleep(1)
+            self.log.info("Clicked on element with locator: " + locator + " locatorType: " + locatorType)
+        except:
+            self.log.info("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
+            print_stack()
+
+
     def sendKeys(self, data, locator, locatorType="id"):
         try:
             element = self.getElement(locator, locatorType)
+            element.clear()
+            element.click()
             element.send_keys(data)
             self.log.info("Sent data on element with locator: " + locator + " locatorType: " + locatorType)
         except:
@@ -101,12 +131,13 @@ class SeleniumDriver():
 
 
     def waitForElement(self, locator, locatorType="id", timeout=10, pollFrequency=0.5):
+        time.sleep(2)
         element = None
         try:
             byType = self.getByType(locatorType)
             self.log.info("Waiting for maximum :: " + str(timeout) +
                   " :: seconds for element to be clickable")
-            wait = WebDriverWait(self.driver, 10, poll_frequency=pollFrequency,
+            wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=pollFrequency,
                                  ignored_exceptions=[NoSuchElementException,
                                                      ElementNotVisibleException,
                                                      ElementNotSelectableException])
@@ -117,6 +148,20 @@ class SeleniumDriver():
             print_stack()
         return element
 
+    def waitForElementToDissapear(self, locator, locatorType="id", timeout=10, pollFrequency=0.5):
+        try:
+            byType = self.getByType(locatorType)
+            self.log.info("Waiting for maximum :: " + str(timeout) +
+                  " :: seconds for element to dissapear")
+            wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=pollFrequency,
+                                 ignored_exceptions=[NoSuchElementException,
+                                                     ElementNotVisibleException,
+                                                     ElementNotSelectableException])
+            wait.until_not(EC.presence_of_element_located((byType, locator)))
+            self.log.info("Element %s  %s disappeared on the web page" % (locator, locatorType))
+        except:
+            self.log.info("Element %s  %s not disappeared on the web page" % (locator, locatorType))
+            print_stack()
 
 
     def write_delta_to_csv(self, suit_run_path, file_name, delta):
@@ -138,3 +183,15 @@ class SeleniumDriver():
         delta = time.time() - start_time
         self.write_delta_to_csv(suit_run_path, inspect.stack()[0][3], delta)
         self.log.info('It took %s seconds for element to appear: %s %s' % (delta, locator, bytype))
+
+    def execute_js_search(self, elem):
+        elem = self.getElement(elem)
+        my = 'name=selenium* and status=rebootinprogress'
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value=''")
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=selenium* and status=rebootinprogress'")
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
+
+    def scroll_down(self, element):
+        self.driver.execute_script("arguments[0].scrollIntoView(true);",element)
+        var = "//li/a[contains(text(), 'L3_nested_2')]"
+        # self.driver.execute_script("document.getElementByXpath('%s').click()" % var)

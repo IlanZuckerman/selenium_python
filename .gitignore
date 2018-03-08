@@ -111,3 +111,4 @@ gen
 /screenshot/
 /tests/home/.pytest_cache/
 /.pytest_cache/
+/tests/home/report.html
