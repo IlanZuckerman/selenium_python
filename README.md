@@ -7,14 +7,19 @@ This is a selenium webDriver effort made for Functional UI E2E tests when the sy
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
+This is a list of working components for this test suit to run. The versions are from when the code was written, meaning
+that later versions could also work but not necessarily.
 
 Python -> 3+
+
 Selenium -> 3.9.0
+
 Java -> 8+
+
 Gecko Driver -> 0.19.1  you can download it here: https://github.com/mozilla/geckodriver/releases
-```
-Give examples
-```
+
+FireFox -> 57.0.1 
+
 
 ### Installing
 **Gecko Driver:**
@@ -46,7 +51,9 @@ Example:
 self.lp.login('moshe', '123')
 ```
 Navigate to projects Root and execute command with this pattern:
+
 py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=<url> --html=report.html --self-contained-html
+
 Example:
 ```
 py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=https://b01-h21-r620.rhev.openstack.engineering.redhat.com --html=report.html --self-contained-html

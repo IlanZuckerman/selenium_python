@@ -1,11 +1,13 @@
 import inspect, time, os
 from selenium.webdriver.common.by import By
+from traceback import print_stack
 
 
 class HandyWrappers():
 
     def __init__(self, driver):
         self.driver = driver
+
 
     def getByType(self, locatorType):
         locatorType = locatorType.lower()
@@ -51,21 +53,3 @@ class HandyWrappers():
             print("Element not found")
             return False
 
-    def write_delta_to_csv(self, suit_run_path, file_name, delta):
-        with open(os.path.join(suit_run_path, file_name), 'w') as full_path:
-            full_path.write(str(delta))
-        print('wrote to ' + str(full_path))
-
-    def measure_time(self, locator, bytype, start_time, timeout, suit_run_path):
-        exit_condition = False
-        while not exit_condition:
-            exit_condition = self.isElementPresent(locator, bytype)
-
-            print('Measuring time for locator: %s type: %s' % (locator, bytype))
-            time.sleep(1)
-            if (time.time() - start_time) > timeout:
-                self.fail('It took more than %s seconds for element to appear: %s %s' % (timeout, locator, bytype))
-
-        delta = time.time() - start_time
-        self.write_delta_to_csv(suit_run_path, inspect.stack()[0][3], delta)
-        print('It took %s seconds for element to appear: %s %s' % (delta, locator, bytype))

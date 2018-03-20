@@ -17,6 +17,9 @@ class SeleniumDriver():
 
     def __init__(self, driver):
         self.driver = driver
+        self.start_time = 0
+        self.end_time = 0
+
 
     def screenShot(self, resultMessage):
         fileName = resultMessage + '.' + str(round(time.time() * 1000)) + '.png'
@@ -55,7 +58,7 @@ class SeleniumDriver():
         elif locatorType == "tagname":
             return By.TAG_NAME
         else:
-            self.log.info("Locator type " + locatorType + " not correct/supported")
+            self.log.warn("Locator type " + locatorType + " not correct/supported")
         return False
 
 
@@ -67,7 +70,7 @@ class SeleniumDriver():
             element = self.driver.find_element(byType, locator)
             self.log.info("Element Found: %s %s " % (locator, locatorType))
         except:
-            self.log.info("Element not found: %s %s " % (locator, locatorType))
+            self.log.warn("Element not found: %s %s " % (locator, locatorType))
         return element
 
     def getElements(self, locator, locatorType="id"):
@@ -78,7 +81,7 @@ class SeleniumDriver():
             elements = self.driver.find_elements(byType, locator)
             self.log.info("Element Found: %s %s " % (locator, locatorType))
         except:
-            self.log.info("Element not found: %s %s " % (locator, locatorType))
+            self.log.warn("Element not found: %s %s " % (locator, locatorType))
         return elements
 
 
@@ -89,18 +92,24 @@ class SeleniumDriver():
             element.click()
             self.log.info("Clicked on element with locator: " + locator + " locatorType: " + locatorType)
         except:
-            self.log.info("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
+            self.log.warn("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
 
     def elementClickShift(self, locator, locatorType="id"):
-        # TODO: add a step to check if line already selected, and select it only if its not.
         try:
             elem = self.getElement(locator, locatorType)
-            ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
-            time.sleep(1)
-            self.log.info("Clicked on element with locator: " + locator + " locatorType: " + locatorType)
+            parent = self.getElement(locator + '//parent::tr', locatorType)
+            parent_class_name = parent.get_attribute('class')
+            # i noted then when a row already selected, its class attribute value consist of few white space delimmited
+            # phrases such as 'GNEKTHVBHM GNEKTHVBJM'. so clicking on a row with only one frase to avoid double click on
+            # the same row.
+            if len(parent_class_name.split()) == 1:
+                ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
+                time.sleep(1)
+                self.log.info(" Shift Clicked on element with locator: " + locator + " locatorType: " + locatorType)
+
         except:
-            self.log.info("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
+            self.log.warn("Cannot Shift click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
 
 
@@ -112,7 +121,7 @@ class SeleniumDriver():
             element.send_keys(data)
             self.log.info("Sent data on element with locator: " + locator + " locatorType: " + locatorType)
         except:
-            self.log.info("Cannot send data on the element with locator: " + locator + " locatorType: " + locatorType)
+            self.log.warn("Cannot send data on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
 
 
@@ -123,7 +132,7 @@ class SeleniumDriver():
                 self.log.info("Element Found: %s %s " % (locator, byType))
                 return True
             else:
-                self.log.info("Element not found: %s %s " % (locator, byType))
+                self.log.warn("Element not found: %s %s " % (locator, byType))
                 return False
         except:
             self.log.info("Element not found")
@@ -144,7 +153,7 @@ class SeleniumDriver():
             element = wait.until(EC.element_to_be_clickable((byType, locator)))
             self.log.info("Element %s  %s appeared on the web page" % (locator, locatorType))
         except:
-            self.log.info("Element %s  %s not appeared on the web page" % (locator, locatorType))
+            self.log.warn("Element %s  %s not appeared on the web page" % (locator, locatorType))
             print_stack()
         return element
 
@@ -160,29 +169,29 @@ class SeleniumDriver():
             wait.until_not(EC.presence_of_element_located((byType, locator)))
             self.log.info("Element %s  %s disappeared on the web page" % (locator, locatorType))
         except:
-            self.log.info("Element %s  %s not disappeared on the web page" % (locator, locatorType))
+            self.log.warn("Element %s  %s not disappeared from the web page" % (locator, locatorType))
             print_stack()
 
 
-    def write_delta_to_csv(self, suit_run_path, file_name, delta):
-        with open(os.path.join(suit_run_path, file_name), 'w') as full_path:
-            full_path.write(str(delta))
-            self.log.info('wrote to ' + str(full_path))
-
-
-    def measure_time(self, locator, bytype, start_time, timeout, suit_run_path):
-        exit_condition = False
-        while not exit_condition:
-            exit_condition = self.isElementPresent(locator, bytype)
-
-            self.log.info('Measuring time for locator: %s type: %s' % (locator, bytype))
-            time.sleep(1)
-            if (time.time() - start_time) > timeout:
-                self.fail('It took more than %s seconds for element to appear: %s %s' % (timeout, locator, bytype))
-
-        delta = time.time() - start_time
-        self.write_delta_to_csv(suit_run_path, inspect.stack()[0][3], delta)
-        self.log.info('It took %s seconds for element to appear: %s %s' % (delta, locator, bytype))
+    # def write_delta_to_csv(self, suit_run_path, file_name, delta):
+    #     with open(os.path.join(suit_run_path, file_name), 'w') as full_path:
+    #         full_path.write(str(delta))
+    #         self.log.info('wrote to ' + str(full_path))
+    #
+    #
+    # def measure_time(self, locator, bytype, start_time, timeout, suit_run_path):
+    #     exit_condition = False
+    #     while not exit_condition:
+    #         exit_condition = self.isElementPresent(locator, bytype)
+    #
+    #         self.log.info('Measuring time for locator: %s type: %s' % (locator, bytype))
+    #         time.sleep(1)
+    #         if (time.time() - start_time) > timeout:
+    #             self.fail('It took more than %s seconds for element to appear: %s %s' % (timeout, locator, bytype))
+    #
+    #     delta = time.time() - start_time
+    #     self.write_delta_to_csv(suit_run_path, inspect.stack()[0][3], delta)
+    #     self.log.info('It took %s seconds for element to appear: %s %s' % (delta, locator, bytype))
 
     def execute_js_search(self, elem):
         elem = self.getElement(elem)
@@ -190,8 +199,38 @@ class SeleniumDriver():
         self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value=''")
         self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=selenium* and status=rebootinprogress'")
         self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
+        self.log.info('Attempted to Executed JS')
 
     def scroll_down(self, element):
         self.driver.execute_script("arguments[0].scrollIntoView(true);",element)
         var = "//li/a[contains(text(), 'L3_nested_2')]"
-        # self.driver.execute_script("document.getElementByXpath('%s').click()" % var)
+
+
+    def write_delta_to_csv(self, test_function_name, delta):
+        fileName = test_function_name + '.' + str(round(time.time() * 1000)) + '.csv'
+        timeMeasureDir = '../time_measurements/'
+        relativeFileName = timeMeasureDir + fileName.replace(" ", "")
+        currentDirectory = os.path.dirname(__file__)
+        destinationFile = os.path.join(currentDirectory, relativeFileName)
+        destinationDirectory = os.path.join(currentDirectory, timeMeasureDir)
+
+        try:
+            if not os.path.exists((destinationDirectory)):
+                os.makedirs(destinationDirectory)
+
+            with open(destinationFile, 'w') as full_path:
+                full_path.write(str(delta))
+
+            self.log.info('Time measure saved to directory: ' + destinationFile)
+        except:
+            self.log.error('### Exception Occured')
+            print_stack()
+
+
+    def start_timer(self):
+        self.start_time = time.time()
+
+
+    def stop_timer(self):
+        self.end_time = time.time()
+        return self.end_time - self.start_time

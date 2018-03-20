@@ -9,9 +9,9 @@ def setUp():
 
 
 @pytest.yield_fixture(scope="class")
-def oneTimeSetUp(request, browser):
+def oneTimeSetUp(request, browser, engineUrl):
     print("Running one time setUp")
-    wdf = WebDriverFactory(browser)
+    wdf = WebDriverFactory(browser, engineUrl)
     driver = wdf.getWebDriverInstance()
 
     if request.cls is not None:
@@ -25,6 +25,7 @@ def oneTimeSetUp(request, browser):
 def pytest_addoption(parser):
     parser.addoption("--browser")
     parser.addoption("--osType", help="Type of operating system")
+    parser.addoption("--engineUrl", help="URL for engine. for example https://b01-h21-r620.rhev.openstack.engineering.redhat.com")
 
 @pytest.fixture(scope="session")
 def browser(request):
@@ -33,3 +34,7 @@ def browser(request):
 @pytest.fixture(scope="session")
 def osType(request):
     return request.config.getoption("--osType")
+
+@pytest.fixture(scope="session")
+def engineUrl(request):
+    return request.config.getoption("--engineUrl")

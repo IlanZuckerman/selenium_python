@@ -1,7 +1,6 @@
 # pip freeze > requirements.txt
 # pip install -r requirements.txt
-import re
-import time, unittest, pytest
+import time, unittest, pytest, re, inspect
 from pages.home.login_page import LoginPage
 from pages.vms.vms_page import VmsPage
 from utilities.teststatus import TestStatus
@@ -29,13 +28,13 @@ class TestLogin(unittest.TestCase):
 
     @pytest.mark.run(order=2)
     def test_valid_login(self):
-        # start_time = self.login()
-        # self.hw.measure_time('id-compute', 'id', start_time, 15, self.suit_run_path)
-        # self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title, 'Title is not as expected')
 
-        self.lp.login('', '')
+        self.lp.start_timer()
+        self.lp.login('admin', 'qum5net')
         result2 = self.lp.verifyLoginSuccesfull()
         result1 = self.lp.verifyTitle()
+        delta = self.lp.stop_timer()
+        self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
         self.ts.mark(result2, 'Title Verified')
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
         time.sleep(3)
@@ -44,31 +43,47 @@ class TestLogin(unittest.TestCase):
     @pytest.mark.run(order=3)
     def test_create_L1vm_from_template(self):
         self.__class__.vm_name = self.vp.create_new_vm_from_template('L1_vm_08-02', cluster_name='L1_vms')
+        self.ts.start_timer()
         # waiting for popup to disappear
         self.ts.waitForElementToDissapear('class="popup-content ui-draggable"', 'xpath')
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+        time.sleep(2)
+
+        # this is for dealing with double flicker thing
+        rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
+        while rows_amount > 1:
+            self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+            time.sleep(2)
+            rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
 
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
+        delta = self.ts.stop_timer()
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+
 
     @pytest.mark.run(order=4)
-    def test_start_previosly_created_vm(self):
+    def test_start_previosly_created_L1_vm(self):
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         time.sleep(3)
 
         # starting vm
         tmp = self.lp.waitForElement("//div[@id='ActionPanelView_Run']/button[1]", 'xpath')
         self.lp.elementClick("//div[@id='ActionPanelView_Run']/button[1]", 'xpath')
+        self.vp.start_timer()
         time.sleep(2)
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Up')
+        time.sleep(2)
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully')
+        delta = self.vp.stop_timer()
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=5)
     def test_reboot_bulk_vms(self):
-        # self.vp.navigate_to_vms_page()
+        self.vp.navigate_to_vms_page()
 
         self.vp.search_for_selenium_vms('*selenium* and status=up')
         time.sleep(5)
@@ -80,6 +95,7 @@ class TestLogin(unittest.TestCase):
         tmp = self.vp.waitForElement('ActionPanelView_Reboot')
         self.vp.elementClick("ActionPanelView_Reboot")
         self.vp.elementClick('DefaultConfirmationPopupView_OnReboot')
+        self.vp.start_timer()
 
         self.vp.elementClick("//div//button[@data-tooltip-content='Clear Search']", 'xpath')
         self.vp.execute_js_search('SearchPanelView_searchStringInput')
@@ -90,21 +106,28 @@ class TestLogin(unittest.TestCase):
         # wait till there is nothing to show
         no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath', timeout=60)
         self.ts.markFinal('test_reboot_10_vm', no_rows_result, 'vms rebooted successfully')
+        delta = self.vp.stop_timer()
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=6)
     def test_create_L2vm_from_template(self):
         self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name='L2_vm_13-02', cluster_name='L2_real')
+        self.ts.start_timer()
         # waiting for popup to disappear
         self.ts.waitForElementToDissapear('class="popup-content ui-draggable"', 'xpath')
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+        time.sleep(2)
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=120)
 
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
+        delta = self.ts.stop_timer()
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=7)
-    def test_start_previosly_created_L2vm(self):
+    def test_start_previosly_created_L2_vm(self):
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+        self.vp.start_timer()
         time.sleep(3)
 
         # starting vm
@@ -133,10 +156,13 @@ class TestLogin(unittest.TestCase):
         self.ts.mark(self.__class__.ip_172, 'The started L2 vm didnt get 172 ip. Extracted ip: ' + str(self.__class__.ip_172))
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully'
                           + 'Extracted ip: ' + str(self.__class__.ip_172))
+        delta = self.vp.stop_timer()
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=8)
     def test_create_nested_host_and_check_status(self):
         self.__class__.host_name = self.vp.create_new_host_with_ip(ip=self.__class__.ip_172, password='redhat', cluster='L3_nested_2')
+        self.vp.start_timer()
 
         self.vp.navigate_to_hosts_page()
         # tmp_hostname = 'host_selenium1520506322330'
@@ -145,8 +171,10 @@ class TestLogin(unittest.TestCase):
                                                     % self.__class__.host_name, locatorType='xpath', timeout=180)
         self.ts.markFinal('test_status_of_nested_host', first_row_painting,
                           'Nested host created successfully ' + self.__class__.host_name)
+        delta = self.vp.stop_timer()
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=8)
+    @pytest.mark.run(order=9)
     def test_putting_bulk_of_nested_hosts_to_maintenance(self):
         self.vp.navigate_to_hosts_page()
         self.vp.search_for_selenium_vms('*selenium* and status=Up')
@@ -160,3 +188,4 @@ class TestLogin(unittest.TestCase):
         self.vp.elementClick(self.vp._management_dropdown_btn)
         self.vp.elementClick(self.vp._management_dropdown_maintenance, 'xpath')
         self.vp.elementClick(self.vp._maintenance_dialog_ok_btn)
+        # TODO: add validations and time measurements

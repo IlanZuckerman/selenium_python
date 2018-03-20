@@ -13,13 +13,14 @@ from selenium import webdriver
 
 class WebDriverFactory():
 
-    def __init__(self, browser):
+    def __init__(self, browser, engineUrl):
         """
         Inits WebDriverFactory class
 
         Returns: None
         """
         self.browser = browser
+        self.engineUrl = engineUrl
     """
     Set chrome driver and iexplorer environment based on OS
 
@@ -37,7 +38,7 @@ class WebDriverFactory():
         Returns:
             'WebDriver Instance'
         """
-        baseURL = "https://b01-h21-r620.rhev.openstack.engineering.redhat.com"
+        # baseURL = "https://b01-h21-r620.rhev.openstack.engineering.redhat.com"
         if self.browser == "iexplorer":
             # Set ie driver
             driver = webdriver.Ie()
@@ -53,5 +54,5 @@ class WebDriverFactory():
         # Maximize the window
         # driver.maximize_window()
         # Loading browser with App URL
-        driver.get(baseURL)
+        driver.get(self.engineUrl)
         return driver

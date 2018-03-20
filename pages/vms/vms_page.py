@@ -72,10 +72,8 @@ class VmsPage(SeleniumDriver):
             self.elementClick(self._advanced_options_btn)
 
         self.elementClick(self._resource_allocation_sideBar, 'xpath')
-        # time.sleep(3)
         self.waitForElement(self._thinDisk_radio)
         self.elementClick(self._thinDisk_radio)
-        print('ds')
 
     def validate_vm_status(self, status):
         # element = self.waitForElement("//tbody//div[contains(text(),'%s')]" % status, 'xpath', timeout=60)
