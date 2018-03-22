@@ -118,7 +118,7 @@ class TestLogin(unittest.TestCase):
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         time.sleep(2)
-        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
+        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=300)
 
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
         delta = self.ts.stop_timer()
@@ -136,7 +136,7 @@ class TestLogin(unittest.TestCase):
         time.sleep(2)
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Up')
-        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
+        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=300)
 
         for i in range(1, 30):
             ip_elem = self.vp.getElement('//table//tbody/tr[1]/td[6]/div/div', 'xpath')
