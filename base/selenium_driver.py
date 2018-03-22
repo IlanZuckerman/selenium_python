@@ -104,6 +104,8 @@ class SeleniumDriver():
             # phrases such as 'GNEKTHVBHM GNEKTHVBJM'. so clicking on a row with only one frase to avoid double click on
             # the same row.
             if len(parent_class_name.split()) == 1:
+                # ActionChains(self.driver).move_to_element(elem).perform()
+                self.driver.execute_script("arguments[0].scrollIntoView();", elem)
                 ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
                 time.sleep(1)
                 self.log.info(" Shift Clicked on element with locator: " + locator + " locatorType: " + locatorType)
@@ -197,7 +199,7 @@ class SeleniumDriver():
         elem = self.getElement(elem)
         my = 'name=selenium* and status=rebootinprogress'
         self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value=''")
-        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=selenium* and status=rebootinprogress'")
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=*L1* and status=rebootinprogress'")
         self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
         self.log.info('Attempted to Executed JS')
 

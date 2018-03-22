@@ -113,3 +113,4 @@ gen
 /.pytest_cache/
 /tests/home/report.html
 /time_measurements/
+/report.html

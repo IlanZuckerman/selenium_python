@@ -82,14 +82,14 @@ class TestLogin(unittest.TestCase):
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=5)
-    def test_reboot_bulk_vms(self):
+    def test_reboot_bulk_of_20_L1_vms(self):
         self.vp.navigate_to_vms_page()
 
-        self.vp.search_for_selenium_vms('*selenium* and status=up')
+        self.vp.search_for_selenium_vms('*L1* and status=up')
         time.sleep(5)
         rows_amount = len(self.lp.getElements('//tr', 'xpath'))
         if rows_amount > 2:
-            for i in range(1, rows_amount):
+            for i in range(1, 21):
                 self.lp.elementClickShift('//table//tbody/tr[%s]/td[1]' % (i), 'xpath')
         # starting vm
         tmp = self.vp.waitForElement('ActionPanelView_Reboot')
@@ -118,7 +118,7 @@ class TestLogin(unittest.TestCase):
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         time.sleep(2)
-        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=120)
+        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
 
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
         delta = self.ts.stop_timer()
