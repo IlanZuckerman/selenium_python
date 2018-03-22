@@ -72,6 +72,16 @@ tests/home/report.html
 
 ### Break down into end to end tests
 
+####test_invalid_login
+####test_valid_login
+####test_create_L1vm_from_template
+####test_start_previosly_created_L1_vm
+####test_reboot_bulk_of_20_L1_vms
+####test_create_L2vm_from_template
+####test_start_previosly_created_L2_vm
+####test_create_nested_host_and_check_status
+####test_putting_bulk_of_nested_hosts_to_maintenance NOT COMPLETE YET!
+
 Explain what these tests test and why
 
 ```
