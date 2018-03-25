@@ -1,8 +1,8 @@
-from base.selenium_driver import SeleniumDriver
+from base.basepage import BasePage
 import utilities.custom_logger as cl
 import logging, time
 
-class LoginPage(SeleniumDriver):
+class LoginPage(BasePage):
 
     log = cl.customLogger(logging.DEBUG)
 
@@ -38,7 +38,7 @@ class LoginPage(SeleniumDriver):
 
     def verifyLoginSuccesfull(self):
         # self.assertIn('Red Hat Virtualization Manager Web Administration', self.driver.title, 'Title is not as expected')
-        element = self.waitForElement('id-compute')
+        element = self.waitForElement('id-compute', timeout=30)
         return element is not None
 
     def verifyLoginFailed(self):
@@ -47,8 +47,4 @@ class LoginPage(SeleniumDriver):
         return result
 
     def verifyTitle(self):
-        time.sleep(2)
-        if 'Red Hat Virtualization Manager Web Administration' in self.getTitle():
-            return True
-        else:
-            return False
+        return self.verifyPageTitle('Red Hat Virtualization Manager Web Administration')

@@ -4,8 +4,10 @@ import time, unittest, pytest, re, inspect
 from pages.home.login_page import LoginPage
 from pages.vms.vms_page import VmsPage
 from utilities.teststatus import TestStatus
-
+from ddt import ddt, data, unpack
+from utilities.read_data import getCSVData
 @pytest.mark.usefixtures('oneTimeSetUp', 'setUp')
+@ddt
 class TestLogin(unittest.TestCase):
     vm_name = ''
     ip_172 = []
@@ -23,12 +25,9 @@ class TestLogin(unittest.TestCase):
         self.lp.login()
         result = self.lp.verifyLoginFailed()
         self.ts.markFinal('test_invalid_login', result, 'Invalid login went good')
-        # assert result == True
-        time.sleep(3)
 
     @pytest.mark.run(order=2)
     def test_valid_login(self):
-
         self.lp.start_timer()
         self.lp.login('admin', 'qum5net')
         result2 = self.lp.verifyLoginSuccesfull()
@@ -37,15 +36,17 @@ class TestLogin(unittest.TestCase):
         self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
         self.ts.mark(result2, 'Title Verified')
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
-        time.sleep(3)
 
 
-    @pytest.mark.run(order=3)
+    @pytest.mark.run(order=33)
     def test_create_L1vm_from_template(self):
-        self.__class__.vm_name = self.vp.create_new_vm_from_template('L1_vm_08-02', cluster_name='L1_vms')
+        template_name = 'L1_vm_08-02'
+        cluster_name = 'L1_vms'
+
+        self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name, cluster_name)
         self.ts.start_timer()
         # waiting for popup to disappear
-        self.ts.waitForElementToDissapear('class="popup-content ui-draggable"', 'xpath')
+        # self.vp.waitForElementToDissapear('class="popup-content ui-draggable"', 'xpath')
 
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         time.sleep(2)
@@ -63,10 +64,9 @@ class TestLogin(unittest.TestCase):
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
 
-    @pytest.mark.run(order=4)
+    @pytest.mark.run(order=44)
     def test_start_previosly_created_L1_vm(self):
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
-        time.sleep(3)
 
         # starting vm
         tmp = self.lp.waitForElement("//div[@id='ActionPanelView_Run']/button[1]", 'xpath')
@@ -81,15 +81,17 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=5)
-    def test_reboot_bulk_of_20_L1_vms(self):
+    @pytest.mark.run(order=3)
+    @data(5, 10)
+    # @data(*getCSVData('path_to_csv_file')) # to use data from csv
+    def test_reboot_bulk_L1_vms(self, bulk):
         self.vp.navigate_to_vms_page()
 
         self.vp.search_for_selenium_vms('*L1* and status=up')
         time.sleep(5)
         rows_amount = len(self.lp.getElements('//tr', 'xpath'))
         if rows_amount > 2:
-            for i in range(1, 21):
+            for i in range(1, int(bulk) + 1):
                 self.lp.elementClickShift('//table//tbody/tr[%s]/td[1]' % (i), 'xpath')
         # starting vm
         tmp = self.vp.waitForElement('ActionPanelView_Reboot')
@@ -107,7 +109,7 @@ class TestLogin(unittest.TestCase):
         no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath', timeout=60)
         self.ts.markFinal('test_reboot_10_vm', no_rows_result, 'vms rebooted successfully')
         delta = self.vp.stop_timer()
-        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
 
     @pytest.mark.run(order=6)
     def test_create_L2vm_from_template(self):

@@ -1,16 +1,18 @@
 from selenium.webdriver import ActionChains
 
-from base.selenium_driver import SeleniumDriver
+from base.basepage import BasePage
+from utilities.util import Util
 import utilities.custom_logger as cl
 import logging, time
 
-class VmsPage(SeleniumDriver):
+class VmsPage(BasePage):
 
     log = cl.customLogger(logging.DEBUG)
 
     def __init__(self, driver):
         super().__init__(driver)
         self.driver = driver
+        self.util = Util()
 
     # locators
     _compute = 'id-compute'
@@ -31,6 +33,7 @@ class VmsPage(SeleniumDriver):
     _ok_btn = 'VmPopupView_OnSave'
     _search_lbl = 'SearchPanelView_searchStringInput'
     _search_btn = 'SearchPanelView_searchButton'
+    _new_vm_dialog = "class='popup-content ui-draggable'"
 
     # new hosts dialog
     _host_cluster_dropDown_btn = "//div[@id='HostPopupView_cluster']//button"
@@ -45,11 +48,13 @@ class VmsPage(SeleniumDriver):
         element_to_hover = self.getElement(self._compute)
         ActionChains(self.driver).move_to_element(element_to_hover).perform()
         time.sleep(2)
+        self.util.sleep(1, 'Hover over compute to work')
 
     def click_new(self):
         self.elementClick(self._new_vm_btn)
 
     def choose_template_from_dropdown(self, template_name):
+        self.util.sleep(4, 'Create vm Dialog settle down')
         tmp = self.waitForElement(self._template_dropDown, 'xpath')
         self.elementClick(self._template_dropDown, 'xpath')
         self.elementClick("//*[contains(text(), '%s')]" % template_name, 'xpath')
@@ -82,12 +87,14 @@ class VmsPage(SeleniumDriver):
 
     def search_for_selenium_vms(self, vm_name):
         # TODO: change this wait to something like "if visible on page"
-        time.sleep(3)
-        tmp = self.waitForElement(self._search_lbl)
+        # time.sleep(3)
+
+        elem = self.waitForElementToApear(self._search_lbl, 'xpath')
         search_query = 'name=' + vm_name
         self.sendKeys(search_query, self._search_lbl)
-        # time.sleep(3)
+        self.util.sleep(3, 'Flickering when searching')
         self.elementClick(self._search_btn)
+        self.util.sleep(3, 'Search results settling down')
 
     def navigate_to_vms_page(self):
         self.hover_over_compute()
@@ -107,12 +114,14 @@ class VmsPage(SeleniumDriver):
         self.hover_over_compute()
         self.elementClick(self._compute_vms)
         self.elementClick(self._new_vm_btn)
+        # self.util.sleep(3, 'Create vm Dialog settle down')
         self.choose_cluster_from_dropdown(cluster_name)
         self.choose_template_from_dropdown(template_name)
 
         vm_name = self.enter_vm_name()
         self.select_thinDisk()
         self.elementClick(self._ok_btn)
+        self.waitForElementToDissapear(self._new_vm_dialog, 'xpath')
         return vm_name
 
 
