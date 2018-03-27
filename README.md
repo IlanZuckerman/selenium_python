@@ -44,19 +44,13 @@ pip install -r requirements.txt
 
 ## Running the tests
 
-Inside tests/home/test_login.py search for a line with self.lp.login('', '') and insert in place of empty quotes relevant
-user name and password.
-Example:
-```
-self.lp.login('moshe', '123')
-```
 Navigate to projects Root and execute command with this pattern:
 
-py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=<url> --html=report.html --self-contained-html
+py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=<url> --username=<...> --password=<...> --html=report.html --self-contained-html
 
 Example:
 ```
-py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=https://b01-h21-r620.rhev.openstack.engineering.redhat.com --html=report.html --self-contained-html
+py.test -s -v tests/home/test_login.py --browser=firefox --engineUrl=https://b01-h21-r620.rhev.openstack.engineering.redhat.com --username=moshe --password=123 --html=report.html --self-contained-html
 ```
 
 ### Tests After run artifacts
@@ -80,7 +74,7 @@ tests/home/report.html
 ####test_create_L2vm_from_template
 ####test_start_previosly_created_L2_vm
 ####test_create_nested_host_and_check_status
-####test_putting_bulk_of_nested_hosts_to_maintenance NOT COMPLETE YET!
+####test_putting_bulk_of_nested_hosts_to_maintenance
 
 Explain what these tests test and why
 

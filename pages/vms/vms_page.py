@@ -44,6 +44,9 @@ class VmsPage(BasePage):
     _ok_false_btn = 'HostPopupView_OnSaveFalse'
     _power_management_ok_btn = 'DefaultConfirmationPopupView_OnSaveInternalNotFromApprove'
 
+    # table elements
+    _table_first_column = '//table//tbody/tr[{0}]/td[1]'  # used for clicking the row. formatted to use it in multiple rows
+
     def hover_over_compute(self):
         element_to_hover = self.getElement(self._compute)
         ActionChains(self.driver).move_to_element(element_to_hover).perform()
@@ -146,3 +149,5 @@ class VmsPage(BasePage):
         self.elementClick(self._power_management_ok_btn)
         return name
 
+    def get_amount_of_rows_in_table(self, expected_rows_mnt):
+        return self.verifyAmountOfRowsInTable(expected_rows_mnt)

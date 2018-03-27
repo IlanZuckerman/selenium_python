@@ -13,12 +13,14 @@ from selenium import webdriver
 
 class WebDriverFactory():
 
-    def __init__(self, browser, engineUrl):
+    def __init__(self, username, password, browser, engineUrl):
         """
         Inits WebDriverFactory class
 
         Returns: None
         """
+        self.username = username
+        self.password = password
         self.browser = browser
         self.engineUrl = engineUrl
     """

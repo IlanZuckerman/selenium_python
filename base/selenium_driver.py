@@ -97,21 +97,21 @@ class SeleniumDriver():
             self.log.warn("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
 
-    def elementClickShift(self, locator, locatorType="id"):
+    def elementClickShift(self, locator='', locatorType='id', elem=None):
         try:
-            elem = self.getElement(locator, locatorType)
+            if locator:
+                elem = self.getElement(locator, locatorType)
             parent = self.getElement(locator + '//parent::tr', locatorType)
             parent_class_name = parent.get_attribute('class')
             # i noted then when a row already selected, its class attribute value consist of few white space delimmited
-            # phrases such as 'GNEKTHVBHM GNEKTHVBJM'. so clicking on a row with only one frase to avoid double click on
+            # phrases such as 'GNEKTHVBHM GNEKTHVBJM'. so clicking on a row with only one phrase to avoid double click on
             # the same row.
+            # TODO: Solve problem when clicking but row not sellected
             if len(parent_class_name.split()) == 1:
-                # ActionChains(self.driver).move_to_element(elem).perform()
                 self.driver.execute_script("arguments[0].scrollIntoView();", elem)
                 ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
                 time.sleep(1)
                 self.log.info(" Shift Clicked on element with locator: " + locator + " locatorType: " + locatorType)
-
         except:
             self.log.warn("Cannot Shift click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()

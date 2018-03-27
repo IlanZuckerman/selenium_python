@@ -6,6 +6,8 @@ from pages.vms.vms_page import VmsPage
 from utilities.teststatus import TestStatus
 from ddt import ddt, data, unpack
 from utilities.read_data import getCSVData
+
+
 @pytest.mark.usefixtures('oneTimeSetUp', 'setUp')
 @ddt
 class TestLogin(unittest.TestCase):
@@ -14,10 +16,12 @@ class TestLogin(unittest.TestCase):
     host_name = ''
 
     @pytest.fixture(autouse=True)
-    def classSetup(self, oneTimeSetUp):
+    def classSetup(self, oneTimeSetUp, username, password):
         self.lp = LoginPage(self.driver)
         self.vp = VmsPage(self.driver)
         self.ts = TestStatus(self.driver)
+        self.username = username
+        self.password = password
 
     @pytest.mark.run(order=1)
     def test_invalid_login(self):
@@ -29,7 +33,7 @@ class TestLogin(unittest.TestCase):
     @pytest.mark.run(order=2)
     def test_valid_login(self):
         self.lp.start_timer()
-        self.lp.login('admin', 'qum5net')
+        self.lp.login(self.username, self.password)
         result2 = self.lp.verifyLoginSuccesfull()
         result1 = self.lp.verifyTitle()
         delta = self.lp.stop_timer()
@@ -38,8 +42,8 @@ class TestLogin(unittest.TestCase):
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
 
 
-    @pytest.mark.run(order=33)
-    def test_create_L1vm_from_template(self):
+    @pytest.mark.run(order=3)
+    def test_create_L1_vm_from_template(self):
         template_name = 'L1_vm_08-02'
         cluster_name = 'L1_vms'
 
@@ -64,7 +68,7 @@ class TestLogin(unittest.TestCase):
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
 
-    @pytest.mark.run(order=44)
+    @pytest.mark.run(order=4)
     def test_start_previosly_created_L1_vm(self):
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
 
@@ -81,8 +85,8 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=3)
-    @data(5, 10)
+    @pytest.mark.run(order=5)
+    @data(10, 50, 80, 100)
     # @data(*getCSVData('path_to_csv_file')) # to use data from csv
     def test_reboot_bulk_L1_vms(self, bulk):
         self.vp.navigate_to_vms_page()
@@ -177,17 +181,26 @@ class TestLogin(unittest.TestCase):
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=9)
-    def test_putting_bulk_of_nested_hosts_to_maintenance(self):
+    @data(10)
+    def test_putting_bulk_of_nested_hosts_to_maintenance(self, bulk):
         self.vp.navigate_to_hosts_page()
-        self.vp.search_for_selenium_vms('*selenium* and status=Up')
-        # TODO: think how to handle this sleep. it is because search results flickers couple of times
-        time.sleep(10)
-        rows_amount = len(self.lp.getElements('//tr', 'xpath'))
+        self.vp.search_for_selenium_vms('*nested* and status=Up')
+
+        rows_amount = len(self.vp.getElements('//tr', 'xpath'))
         if rows_amount > 2:
-            for i in range(1, rows_amount):
-                self.lp.elementClickShift('//table//tbody/tr[%s]/td[1]' % (i), 'xpath')
+            for i in range(1, bulk + 1):
+                self.vp.elementClickShift(self.vp._table_first_column.format(i), 'xpath')
 
         self.vp.elementClick(self.vp._management_dropdown_btn)
         self.vp.elementClick(self.vp._management_dropdown_maintenance, 'xpath')
         self.vp.elementClick(self.vp._maintenance_dialog_ok_btn)
-        # TODO: add validations and time measurements
+
+        self.vp.start_timer()
+
+        self.vp.search_for_selenium_vms('*nested* and status=preparingformaintenance')
+        result = self.vp.verifyAmountOfRowsInTable(expected_rows_amount=1, allowed_offset=0)  # 1 because there is row with 'no results'
+        self.ts.markFinal(testName=inspect.stack()[0][3] + str(bulk), result=result,
+                          resultMessage='Nested hosts put to Maintenance successful')
+
+        delta = self.vp.stop_timer() - 6  # compensating 6 seconds of waits in search_for_selenium_vms
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)

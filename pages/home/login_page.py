@@ -31,7 +31,6 @@ class LoginPage(BasePage):
 
 
     def login(self, username='', password=''):
-        # self.clickWelcomeAdminField()
         self.enterPasswordField(password)
         self.enterUsernameField(username)
         self.clickSubmitButton()

@@ -15,6 +15,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from base.selenium_driver import SeleniumDriver
 from traceback import print_stack
 from utilities.util import Util
+import pytest
 
 class BasePage(SeleniumDriver):
 
@@ -44,3 +45,17 @@ class BasePage(SeleniumDriver):
             self.log.error("Failed to get page title")
             print_stack()
             return False
+
+    def verifyAmountOfRowsInTable(self, expected_rows_amount, allowed_offset=3):
+        """
+
+        """
+        try:
+            WebDriverWait(self.driver, 30).until(lambda x: abs((len(self.getElements('//tr', 'xpath'))-1) - expected_rows_amount) <= allowed_offset)
+            return True
+        except:
+            actualRowsAmount = len(self.getElements('//tr', 'xpath')) - 1  # minus one for ignoring header
+            self.log.error("Amount of rows in the table is not as expected. Actual: %s Expected: %s Allowed offset: %s"
+                           %(actualRowsAmount, expected_rows_amount, allowed_offset))
+            print_stack()
+            return None

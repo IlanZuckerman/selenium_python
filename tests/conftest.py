@@ -10,9 +10,9 @@ def setUp():
 
 
 @pytest.yield_fixture(scope="class")
-def oneTimeSetUp(request, browser, engineUrl):
+def oneTimeSetUp(request, username, password, browser, engineUrl):
     print("Running one time setUp")
-    wdf = WebDriverFactory(browser, engineUrl)
+    wdf = WebDriverFactory(username, password, browser, engineUrl)
     driver = wdf.getWebDriverInstance()
 
     if request.cls is not None:
@@ -24,9 +24,19 @@ def oneTimeSetUp(request, browser, engineUrl):
     print("Running one time tearDown")
 
 def pytest_addoption(parser):
+    parser.addoption("--username", help="Username for logging in")
+    parser.addoption("--password", help="Password for logging in")
     parser.addoption("--browser")
     parser.addoption("--osType", help="Type of operating system")
     parser.addoption("--engineUrl", help="URL for engine. for example https://b01-h21-r620.rhev.openstack.engineering.redhat.com")
+
+@pytest.fixture(scope="session")
+def username(request):
+    return request.config.getoption("--username")
+
+@pytest.fixture(scope="session")
+def password(request):
+    return request.config.getoption("--password")
 
 @pytest.fixture(scope="session")
 def browser(request):
