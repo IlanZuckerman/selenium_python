@@ -46,6 +46,7 @@ class VmsPage(BasePage):
 
     # table elements
     _table_first_column = '//table//tbody/tr[{0}]/td[1]'  # used for clicking the row. formatted to use it in multiple rows
+    _vm_name_field = "//table//tbody/tr[1]//td[3]//a[contains(text(),'{0}')]"  # {0} used for inserting vm name
 
     def hover_over_compute(self):
         element_to_hover = self.getElement(self._compute)
@@ -88,13 +89,14 @@ class VmsPage(BasePage):
         element = self.waitForElement("//tbody//div[(text()='%s')]" % status, 'xpath', timeout=120)
         return element is not None
 
-    def search_for_selenium_vms(self, vm_name):
-        # TODO: change this wait to something like "if visible on page"
-        # time.sleep(3)
+    def validate_vm_name(self, vm_name):
+        elem = self.waitForElement(self._vm_name_field.format(vm_name), locatorType='xpath', timeout=180)
+        return elem is not None
 
-        elem = self.waitForElementToApear(self._search_lbl, 'xpath')
-        search_query = 'name=' + vm_name
-        self.sendKeys(search_query, self._search_lbl)
+    def search_for_selenium_vms(self, search_query):
+        self.waitForElementToApear(self._search_lbl)
+        search_query = 'name=' + search_query
+        self.sendKeys(data=search_query, locator=self._search_lbl)
         self.util.sleep(3, 'Flickering when searching')
         self.elementClick(self._search_btn)
         self.util.sleep(3, 'Search results settling down')

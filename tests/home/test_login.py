@@ -15,7 +15,7 @@ class TestLogin(unittest.TestCase):
     ip_172 = []
     host_name = ''
 
-    @pytest.fixture(autouse=True)
+    @pytest.fixture(autouse=True)  # autouse makes this fixture available for all methods in scope
     def classSetup(self, oneTimeSetUp, username, password):
         self.lp = LoginPage(self.driver)
         self.vp = VmsPage(self.driver)
@@ -41,36 +41,40 @@ class TestLogin(unittest.TestCase):
         self.ts.mark(result2, 'Title Verified')
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
 
-
     @pytest.mark.run(order=3)
     def test_create_L1_vm_from_template(self):
         template_name = 'L1_vm_08-02'
         cluster_name = 'L1_vms'
 
-        self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name, cluster_name)
+        self.__class__.vm_name = self.vp.create_new_vm_from_template(
+            template_name=template_name,
+            cluster_name=cluster_name)
         self.ts.start_timer()
-        # waiting for popup to disappear
-        # self.vp.waitForElementToDissapear('class="popup-content ui-draggable"', 'xpath')
 
-        self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
-        time.sleep(2)
+        self.vp.search_for_selenium_vms(
+            search_query=self.__class__.vm_name + ' and status=Down')
+        # time.sleep(2)
 
         # this is for dealing with double flicker thing
-        rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
-        while rows_amount > 1:
-            self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
-            time.sleep(2)
-            rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
+        # rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
+        # while rows_amount > 1:
+        #     self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+        #     time.sleep(2)
+        #     rows_amount = len(self.lp.getElements('//tbody/tr', 'xpath'))
 
-        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
-        self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
+        # first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
+        #
+        # result = self.vp.waitForElement("//table//tbody/tr[1]//td[3]//a[contains(text(),'%s')]"
+        #                                             % self.__class__.vm_name, locatorType='xpath', timeout=180)
+        result = self.vp.validate_vm_name(vm_name=self.__class__.vm_name)
+
+        self.ts.markFinal('test_create_vm_from_template', result, 'vm created successfully')
         delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-
     @pytest.mark.run(order=4)
     def test_start_previosly_created_L1_vm(self):
-        self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
+        # self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
 
         # starting vm
         tmp = self.lp.waitForElement("//div[@id='ActionPanelView_Run']/button[1]", 'xpath')
@@ -116,7 +120,7 @@ class TestLogin(unittest.TestCase):
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
 
     @pytest.mark.run(order=6)
-    def test_create_L2vm_from_template(self):
+    def test_create_L2_vm_from_template(self):
         self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name='L2_vm_13-02', cluster_name='L2_real')
         self.ts.start_timer()
         # waiting for popup to disappear
