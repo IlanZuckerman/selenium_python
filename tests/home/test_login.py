@@ -8,7 +8,7 @@ from ddt import ddt, data, unpack
 from utilities.read_data import getCSVData
 
 
-@pytest.mark.usefixtures('oneTimeSetUp', 'setUp')
+@pytest.mark.usefixtures('oneTimeSetUp', 'setUp')  # names of fixtures we wanna use from conftest
 @ddt
 class TestLogin(unittest.TestCase):
     vm_name = ''

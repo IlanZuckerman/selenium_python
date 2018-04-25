@@ -94,6 +94,7 @@ class VmsPage(BasePage):
         return elem is not None
 
     def search_for_selenium_vms(self, search_query):
+        self.waitForElementToDissapear(self._new_vm_dialog)
         self.waitForElementToApear(self._search_lbl)
         search_query = 'name=' + search_query
         self.sendKeys(data=search_query, locator=self._search_lbl)
