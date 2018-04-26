@@ -41,7 +41,7 @@ class TestLogin(unittest.TestCase):
         self.ts.mark(result2, 'Title Verified')
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
 
-    @pytest.mark.run(order=33)
+    @pytest.mark.run(order=3)
     def test_create_L1_vm_from_template(self):
         template_name = 'L1_vm_08-02'
         cluster_name = 'L1_vms'
@@ -72,7 +72,7 @@ class TestLogin(unittest.TestCase):
         delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=44)
+    @pytest.mark.run(order=4)
     def test_start_previosly_created_L1_vm(self):
         # self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
 
@@ -89,7 +89,7 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=55)
+    @pytest.mark.run(order=5)
     @data(10, 50, 80, 100)
     # @data(*getCSVData('path_to_csv_file')) # to use data from csv
     def test_reboot_bulk_L1_vms(self, bulk):
@@ -119,7 +119,7 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
 
-    @pytest.mark.run(order=3)
+    @pytest.mark.run(order=6)
     def test_create_L2_vm_from_template(self):
         self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name='L2_vm_13-02', cluster_name='L2_real')
         self.ts.start_timer()
@@ -134,7 +134,7 @@ class TestLogin(unittest.TestCase):
         delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=4)
+    @pytest.mark.run(order=7)
     def test_start_previosly_created_L2_vm(self):
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         self.vp.start_timer()
@@ -169,7 +169,7 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=5)
+    @pytest.mark.run(order=8)
     def test_create_nested_host_and_check_status(self):
         self.__class__.host_name = self.vp.create_new_host_with_ip(ip=self.__class__.ip_172, password='redhat', cluster='L3_nested_2')
         self.vp.start_timer()
