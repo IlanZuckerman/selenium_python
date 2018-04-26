@@ -109,7 +109,7 @@ class TestLogin(unittest.TestCase):
 
         self.vp.elementClick("//div//button[@data-tooltip-content='Clear Search']", 'xpath')
         self.vp.execute_js_search('SearchPanelView_searchStringInput')
-        time.sleep(3)
+        time.sleep(1)
 
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=30)
         print('started painting')
