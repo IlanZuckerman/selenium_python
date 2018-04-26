@@ -101,20 +101,20 @@ class SeleniumDriver():
         try:
             if locator:
                 elem = self.getElement(locator, locatorType)
-            parent = self.getElement(locator + '//parent::tr', locatorType)
-            parent_class_name = parent.get_attribute('class')
+            # parent = self.getElement(locator + '//parent::tr', locatorType)
+            # parent_class_name = parent.get_attribute('class')
             # i noted then when a row already selected, its class attribute value consist of few white space delimmited
             # phrases such as 'GNEKTHVBHM GNEKTHVBJM'. so clicking on a row with only one phrase to avoid double click on
             # the same row.
             # TODO: Solve problem when clicking but row not sellected
-            if len(parent_class_name.split()) == 1:
-                self.driver.execute_script("arguments[0].scrollIntoView();", elem)
-                ActionChains(self.driver).key_down(Keys.CONTROL).click(elem).key_up(Keys.CONTROL).perform()
-                time.sleep(1)
-                self.log.info(" Shift Clicked on element with locator: " + locator + " locatorType: " + locatorType)
+            # if len(parent_class_name.split()) == 1:
+            self.driver.execute_script("arguments[0].scrollIntoView();", elem)
+            ActionChains(self.driver).key_down(Keys.SHIFT).click(elem).key_up(Keys.SHIFT).perform()
+            time.sleep(1)
+            self.log.info(" Shift Clicked on element with locator: " + locator + " locatorType: " + locatorType)
         except:
             self.log.warn("Cannot Shift click on the element with locator: " + locator + " locatorType: " + locatorType)
-            print_stack()
+            # print_stack()
 
 
     def sendKeys(self, data, locator='', locatorType='id', element=None):
@@ -266,7 +266,7 @@ class SeleniumDriver():
         self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
         self.log.info('Attempted to Executed JS')
 
-    def scroll_down(self, element):
+    def scroll_down_till_element_in_view(self, element):
         self.driver.execute_script("arguments[0].scrollIntoView(true);",element)
         var = "//li/a[contains(text(), 'L3_nested_2')]"
 

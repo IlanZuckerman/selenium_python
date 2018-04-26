@@ -42,6 +42,44 @@ class TestLogin(unittest.TestCase):
         self.ts.markFinal('test_valid_login', result1, 'Login successful')
 
     @pytest.mark.run(order=3)
+    @data(10, 50, 80, 100)
+    # @data(*getCSVData('path_to_csv_file')) # to use data from csv
+    def test_reboot_bulk_new_method(self, bulk):
+        self.vp.navigate_to_vms_page()
+
+        self.vp.search_for_selenium_vms('*L1* and status=up')
+        # time.sleep(5)
+
+        # select first row
+        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+
+        # select last row
+        last_row = self.vp.getElement('//table//tbody/tr[%s]/td[1]' % (int(bulk)), 'xpath')
+        self.vp.elementClickShift(elem=last_row)
+        self.vp.elementClickShift(elem=last_row)
+        self.vp.elementClickShift(elem=last_row)
+
+        self.vp.waitForElement('ActionPanelView_Reboot')
+        self.vp.elementClick("ActionPanelView_Reboot")
+        self.vp.elementClick('DefaultConfirmationPopupView_OnReboot')
+        self.vp.start_timer()
+
+        self.vp.elementClick("//div//button[@data-tooltip-content='Clear Search']", 'xpath')
+        self.vp.execute_js_search('SearchPanelView_searchStringInput')
+        time.sleep(1)
+
+        self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=30)
+        print('started painting')
+        # wait till there is nothing to show
+        no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath',
+                                                timeout=120)
+        self.ts.markFinal('test_reboot_bulk_vm', no_rows_result, 'vms rebooted successfully')
+        delta = self.vp.stop_timer()
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
+
+    @pytest.mark.run(order=4)
     def test_create_L1_vm_from_template(self):
         template_name = 'L1_vm_08-02'
         cluster_name = 'L1_vms'
@@ -72,7 +110,7 @@ class TestLogin(unittest.TestCase):
         delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=4)
+    @pytest.mark.run(order=5)
     def test_start_previosly_created_L1_vm(self):
         # self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
 
@@ -89,35 +127,6 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=5)
-    @data(10, 50, 80, 100)
-    # @data(*getCSVData('path_to_csv_file')) # to use data from csv
-    def test_reboot_bulk_L1_vms(self, bulk):
-        self.vp.navigate_to_vms_page()
-
-        self.vp.search_for_selenium_vms('*L1* and status=up')
-        time.sleep(5)
-        rows_amount = len(self.lp.getElements('//tr', 'xpath'))
-        if rows_amount > 2:
-            for i in range(1, int(bulk) + 1):
-                self.lp.elementClickShift('//table//tbody/tr[%s]/td[1]' % (i), 'xpath')
-        # starting vm
-        tmp = self.vp.waitForElement('ActionPanelView_Reboot')
-        self.vp.elementClick("ActionPanelView_Reboot")
-        self.vp.elementClick('DefaultConfirmationPopupView_OnReboot')
-        self.vp.start_timer()
-
-        self.vp.elementClick("//div//button[@data-tooltip-content='Clear Search']", 'xpath')
-        self.vp.execute_js_search('SearchPanelView_searchStringInput')
-        time.sleep(1)
-
-        first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=30)
-        print('started painting')
-        # wait till there is nothing to show
-        no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath', timeout=60)
-        self.ts.markFinal('test_reboot_10_vm', no_rows_result, 'vms rebooted successfully')
-        delta = self.vp.stop_timer()
-        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
 
     @pytest.mark.run(order=6)
     def test_create_L2_vm_from_template(self):
@@ -184,27 +193,34 @@ class TestLogin(unittest.TestCase):
         delta = self.vp.stop_timer()
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
-    @pytest.mark.run(order=9)
-    @data(10)
-    def test_putting_bulk_of_nested_hosts_to_maintenance(self, bulk):
-        self.vp.navigate_to_hosts_page()
-        self.vp.search_for_selenium_vms('*nested* and status=Up')
-
-        rows_amount = len(self.vp.getElements('//tr', 'xpath'))
-        if rows_amount > 2:
-            for i in range(1, bulk + 1):
-                self.vp.elementClickShift(self.vp._table_first_column.format(i), 'xpath')
-
-        self.vp.elementClick(self.vp._management_dropdown_btn)
-        self.vp.elementClick(self.vp._management_dropdown_maintenance, 'xpath')
-        self.vp.elementClick(self.vp._maintenance_dialog_ok_btn)
-
-        self.vp.start_timer()
-
-        self.vp.search_for_selenium_vms('*nested* and status=preparingformaintenance')
-        result = self.vp.verifyAmountOfRowsInTable(expected_rows_amount=1, allowed_offset=0)  # 1 because there is row with 'no results'
-        self.ts.markFinal(testName=inspect.stack()[0][3] + str(bulk), result=result,
-                          resultMessage='Nested hosts put to Maintenance successful')
-
-        delta = self.vp.stop_timer() - 6  # compensating 6 seconds of waits in search_for_selenium_vms
-        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
+    # @pytest.mark.run(order=3)
+    # @data(100)
+    # def test_putting_bulk_of_nested_hosts_to_maintenance(self, bulk):
+    #     self.vp.navigate_to_hosts_page()
+    #     self.vp.search_for_selenium_vms('*nested* and status=Up')
+    #
+    #     # select first row
+    #     self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+    #     self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+    #     self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
+    #
+    #     # select last row
+    #     last_row = self.vp.getElement('//table//tbody/tr[%s]/td[1]' % (int(bulk)), 'xpath')
+    #     self.vp.elementClickShift(elem=last_row)
+    #     self.vp.elementClickShift(elem=last_row)
+    #     self.vp.elementClickShift(elem=last_row)
+    #
+    #     self.vp.elementClick(self.vp._management_dropdown_btn)
+    #     self.vp.elementClick(self.vp._management_dropdown_maintenance, 'xpath')
+    #     self.vp.elementClick(self.vp._maintenance_dialog_ok_btn)
+    #
+    #     self.vp.start_timer()
+    #
+    #     self.vp.search_for_selenium_vms('*nested* and status=preparingformaintenance')
+    #
+    #     result = self.vp.verifyAmountOfRowsInTable(expected_rows_amount=1, allowed_offset=0)  # 1 because there is row with 'no results'
+    #     self.ts.markFinal(testName=inspect.stack()[0][3] + str(bulk), result=result,
+    #                       resultMessage='Nested hosts put to Maintenance successful')
+    #
+    #     delta = self.vp.stop_timer() - 6  # compensating 6 seconds of waits in search_for_selenium_vms
+    #     self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)

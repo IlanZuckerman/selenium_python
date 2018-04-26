@@ -143,7 +143,7 @@ class VmsPage(BasePage):
 
         # drop_down_to_scroll = self.getElement(self._host_cluster_dropDown_menu, 'xpath')
         elem_to_scroll_to = self.getElement("//li/a[contains(text(), '%s')]" % cluster, 'xpath')
-        self.scroll_down(elem_to_scroll_to)
+        self.scroll_down_till_element_in_view(elem_to_scroll_to)
         self.elementClick("//li/a[contains(text(), 'L3')]//parent::*",'xpath')
         name = self.enter_name_for_new_host()
         self.sendKeys(ip, self._host_name_lbl)
