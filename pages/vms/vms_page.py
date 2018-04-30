@@ -48,6 +48,11 @@ class VmsPage(BasePage):
     _table_first_column = '//table//tbody/tr[{0}]/td[1]'  # used for clicking the row. formatted to use it in multiple rows
     _vm_name_field = "//table//tbody/tr[1]//td[3]//a[contains(text(),'{0}')]"  # {0} used for inserting vm name
 
+    # dashboard iframe
+    _dashboard_iframe = "//div//iframe"
+    _elem_with_virtualResources_text = "//div[contains(text(),'Virtual resources')]"
+    _elem_with_lastUpdated_text = "//b[contains(text(),'Last Updated')]"
+
     def hover_over_compute(self):
         element_to_hover = self.getElement(self._compute)
         ActionChains(self.driver).move_to_element(element_to_hover).perform()
@@ -154,3 +159,22 @@ class VmsPage(BasePage):
 
     def get_amount_of_rows_in_table(self, expected_rows_mnt):
         return self.verifyAmountOfRowsInTable(expected_rows_mnt)
+
+
+    def is_iframe_rendered(self):
+        self.waitForElementToApear(locator=self._dashboard_iframe, locatorType='xpath')
+        self.switch_to_iframe(locator=self._dashboard_iframe, locatorType='xpath')
+        elems_with_virtualElements_text = self.getElements(self._elem_with_virtualResources_text, 'xpath')
+        time.sleep(0.2)
+        elem_with_lastUpdated_text = self.getElement(self._elem_with_lastUpdated_text, 'xpath')
+        elems_with_virtualElements_text.append(elem_with_lastUpdated_text)
+        result = self.are_all_elems_displayed(elems_with_virtualElements_text)
+        self.driver.switch_to_default_content()
+        return result
+
+
+    def are_all_elems_displayed(self, elems_list):
+        for elem in elems_list:
+            if not self.isElementDisplayed(element=elem):
+                return False
+        return True

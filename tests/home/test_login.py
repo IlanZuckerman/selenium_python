@@ -23,6 +23,14 @@ class TestLogin(unittest.TestCase):
         self.username = username
         self.password = password
 
+    @pytest.fixture(autouse=True)
+    def setUp(request):
+        print("Method level setup")
+        yield
+        print("Method level teardown")
+        result = request.node.cls.result
+
+
     @pytest.mark.run(order=1)
     def test_invalid_login(self):
         self.lp.clickWelcomeAdminField()
@@ -31,15 +39,22 @@ class TestLogin(unittest.TestCase):
         self.ts.markFinal('test_invalid_login', result, 'Invalid login went good')
 
     @pytest.mark.run(order=2)
-    def test_valid_login(self):
-        self.lp.start_timer()
+    def test_login_dashboard_paint(self):
         self.lp.login(self.username, self.password)
-        result2 = self.lp.verifyLoginSuccesfull()
-        result1 = self.lp.verifyTitle()
+        self.lp.start_timer()
+
+        result = self.vp.is_iframe_rendered()
+        self.ts.markFinal('test_login_dashboard_paint', result, 'Login successful and dashboard painted')
+
         delta = self.lp.stop_timer()
         self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
-        self.ts.mark(result2, 'Title Verified')
-        self.ts.markFinal('test_valid_login', result1, 'Login successful')
+
+        # result2 = self.lp.verifyLoginSuccesfull()
+        # result1 = self.lp.verifyTitle()
+        # delta = self.lp.stop_timer()
+        # self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        # self.ts.mark(result2, 'Title Verified')
+        # self.ts.markFinal('test_valid_login', result1, 'Login successful')
 
     @pytest.mark.run(order=3)
     @data(10, 50, 80, 100)

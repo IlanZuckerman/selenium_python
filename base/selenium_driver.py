@@ -257,6 +257,14 @@ class SeleniumDriver():
             self.log.warn("Element %s  %s NOT APPEARED on the web page" % (locator, locatorType))
             print_stack()
 
+    def switch_to_iframe(self, locatorType="id", locator=""):
+        iframe_element = self.getElement(locator, locatorType)
+        try:
+            self.driver.switch_to.frame(iframe_element)
+        except:
+            self.log.warn("Cold not switch to iframe. locator: %s locator type: %s" % (locator, locatorType))
+            print_stack()
+
 
     def execute_js_search(self, elem):
         elem = self.getElement(elem)
