@@ -306,4 +306,5 @@ class SeleniumDriver():
 
     def stop_timer(self):
         self.end_time = time.time()
-        return self.end_time - self.start_time
+        delta = self.end_time - self.start_time
+        return round(delta, 2)

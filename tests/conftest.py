@@ -5,16 +5,17 @@ from time import gmtime, strftime
 from base.webdriverfactory import WebDriverFactory
 import utilities.custom_logger as cl
 from traceback import print_stack
+from utilities.write_to_exec_report import ReportWriter
 
 log = cl.customLogger(logging.DEBUG)
 
 report_path = None  # initialized during run time
 
-# @pytest.yield_fixture()
-# def setUp():
-#     print("Running method level setUp")
-#     yield
-#     print("Running method level tearDown")
+@pytest.yield_fixture()
+def setUp():
+    print("Running method level setUp")
+    yield
+    print("Running method level tearDown")
 
 
 @pytest.yield_fixture(scope="class")

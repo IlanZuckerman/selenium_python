@@ -6,6 +6,7 @@ from pages.vms.vms_page import VmsPage
 from utilities.teststatus import TestStatus
 from ddt import ddt, data, unpack
 from utilities.read_data import getCSVData
+from utilities.write_to_exec_report import ReportWriter
 
 
 @pytest.mark.usefixtures('oneTimeSetUp', 'setUp')  # names of fixtures we wanna use from conftest
@@ -14,6 +15,8 @@ class TestLogin(unittest.TestCase):
     vm_name = ''
     ip_172 = []
     host_name = ''
+    report_writer = ReportWriter()
+
 
     @pytest.fixture(autouse=True)  # autouse makes this fixture available for all methods in scope
     def classSetup(self, oneTimeSetUp, username, password):
@@ -22,17 +25,16 @@ class TestLogin(unittest.TestCase):
         self.ts = TestStatus(self.driver)
         self.username = username
         self.password = password
+        self.delta = None
+        self.test_function_name = None
 
-    @pytest.fixture(autouse=True)
-    def setUp(request):
-        print("Method level setup")
         yield
-        print("Method level teardown")
-        result = request.node.cls.result
+        self.__class__.report_writer.exec_report_handler(delta=self.delta, test_function_name=self.test_function_name)
 
 
     @pytest.mark.run(order=1)
     def test_invalid_login(self):
+        self.test_function_name=inspect.stack()[0][3]
         self.lp.clickWelcomeAdminField()
         self.lp.login()
         result = self.lp.verifyLoginFailed()
@@ -40,14 +42,15 @@ class TestLogin(unittest.TestCase):
 
     @pytest.mark.run(order=2)
     def test_login_dashboard_paint(self):
+        self.test_function_name=inspect.stack()[0][3]
         self.lp.login(self.username, self.password)
         self.lp.start_timer()
 
         result = self.vp.is_iframe_rendered()
         self.ts.markFinal('test_login_dashboard_paint', result, 'Login successful and dashboard painted')
 
-        delta = self.lp.stop_timer()
-        self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.delta = self.lp.stop_timer()
+        self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
         # result2 = self.lp.verifyLoginSuccesfull()
         # result1 = self.lp.verifyTitle()
@@ -60,6 +63,7 @@ class TestLogin(unittest.TestCase):
     @data(10, 50, 80, 100)
     # @data(*getCSVData('path_to_csv_file')) # to use data from csv
     def test_reboot_bulk_new_method(self, bulk):
+        self.test_function_name=inspect.stack()[0][3]
         self.vp.navigate_to_vms_page()
 
         self.vp.search_for_selenium_vms('*L1* and status=up')
@@ -91,13 +95,15 @@ class TestLogin(unittest.TestCase):
         no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath',
                                                 timeout=120)
         self.ts.markFinal('test_reboot_bulk_vm', no_rows_result, 'vms rebooted successfully')
-        delta = self.vp.stop_timer()
+        self.delta = self.vp.stop_timer()
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
 
     @pytest.mark.run(order=4)
     def test_create_L1_vm_from_template(self):
         template_name = 'L1_vm_08-02'
         cluster_name = 'L1_vms'
+
+        self.test_function_name=inspect.stack()[0][3]
 
         self.__class__.vm_name = self.vp.create_new_vm_from_template(
             template_name=template_name,
@@ -122,11 +128,13 @@ class TestLogin(unittest.TestCase):
         result = self.vp.validate_vm_name(vm_name=self.__class__.vm_name)
 
         self.ts.markFinal('test_create_vm_from_template', result, 'vm created successfully')
-        delta = self.ts.stop_timer()
+        self.delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=5)
     def test_start_previosly_created_L1_vm(self):
+        self.test_function_name=inspect.stack()[0][3]
+
         # self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
 
         # starting vm
@@ -139,12 +147,14 @@ class TestLogin(unittest.TestCase):
         time.sleep(2)
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully')
-        delta = self.vp.stop_timer()
+        self.delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
 
     @pytest.mark.run(order=6)
     def test_create_L2_vm_from_template(self):
+        self.test_function_name=inspect.stack()[0][3]
+
         self.__class__.vm_name = self.vp.create_new_vm_from_template(template_name='L2_vm_13-02', cluster_name='L2_real')
         self.ts.start_timer()
         # waiting for popup to disappear
@@ -155,11 +165,13 @@ class TestLogin(unittest.TestCase):
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=300)
 
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
-        delta = self.ts.stop_timer()
+        self.delta = self.ts.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=7)
     def test_start_previosly_created_L2_vm(self):
+        self.test_function_name=inspect.stack()[0][3]
+
         self.vp.search_for_selenium_vms(self.__class__.vm_name + ' and status=Down')
         self.vp.start_timer()
         time.sleep(3)
@@ -190,11 +202,13 @@ class TestLogin(unittest.TestCase):
         self.ts.mark(self.__class__.ip_172, 'The started L2 vm didnt get 172 ip. Extracted ip: ' + str(self.__class__.ip_172))
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully'
                           + 'Extracted ip: ' + str(self.__class__.ip_172))
-        delta = self.vp.stop_timer()
+        self.delta = self.vp.stop_timer()
         self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     @pytest.mark.run(order=8)
     def test_create_nested_host_and_check_status(self):
+        self.test_function_name=inspect.stack()[0][3]
+
         self.__class__.host_name = self.vp.create_new_host_with_ip(ip=self.__class__.ip_172, password='redhat', cluster='L3_nested_2')
         self.vp.start_timer()
 
@@ -205,7 +219,7 @@ class TestLogin(unittest.TestCase):
                                                     % self.__class__.host_name, locatorType='xpath', timeout=300)
         self.ts.markFinal('test_status_of_nested_host', first_row_painting,
                           'Nested host created successfully ' + self.__class__.host_name)
-        delta = self.vp.stop_timer()
+        self.delta = self.vp.stop_timer()
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
 
     # @pytest.mark.run(order=3)
