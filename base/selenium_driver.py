@@ -266,17 +266,8 @@ class SeleniumDriver():
             print_stack()
 
 
-    def execute_js_search(self, elem):
-        elem = self.getElement(elem)
-        my = 'name=selenium* and status=rebootinprogress'
-        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value=''")
-        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=*L1* and status=rebootinprogress'")
-        self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
-        self.log.info('Attempted to Executed JS')
-
     def scroll_down_till_element_in_view(self, element):
         self.driver.execute_script("arguments[0].scrollIntoView(true);",element)
-        var = "//li/a[contains(text(), 'L3_nested_2')]"
 
 
     def write_delta_to_csv(self, test_function_name, delta):

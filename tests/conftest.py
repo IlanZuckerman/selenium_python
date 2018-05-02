@@ -20,6 +20,9 @@ def setUp():
 
 @pytest.yield_fixture(scope="class")
 def oneTimeSetUp(request, username, password, browser, engineUrl):
+    self = request.node.cls
+    self.moshe = 1
+
     print("Running one time setUp")
     wdf = WebDriverFactory(username, password, browser, engineUrl)
     driver = wdf.getWebDriverInstance()

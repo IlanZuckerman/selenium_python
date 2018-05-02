@@ -34,6 +34,9 @@ class VmsPage(BasePage):
     _search_lbl = 'SearchPanelView_searchStringInput'
     _search_btn = 'SearchPanelView_searchButton'
     _new_vm_dialog = "class='popup-content ui-draggable'"
+    _reboot_vm_btn = 'ActionPanelView_Reboot'
+    _reboot_confirmation_btn = 'DefaultConfirmationPopupView_OnReboot'
+    _clear_search_btn = "//div//button[@data-tooltip-content='Clear Search']"
 
     # new hosts dialog
     _host_cluster_dropDown_btn = "//div[@id='HostPopupView_cluster']//button"
@@ -98,14 +101,14 @@ class VmsPage(BasePage):
         elem = self.waitForElement(self._vm_name_field.format(vm_name), locatorType='xpath', timeout=180)
         return elem is not None
 
-    def search_for_selenium_vms(self, search_query):
+    def search_for_selenium_vms(self, search_query, pause=3):
         self.waitForElementToDissapear(self._new_vm_dialog)
         self.waitForElementToApear(self._search_lbl)
         search_query = 'name=' + search_query
         self.sendKeys(data=search_query, locator=self._search_lbl)
-        self.util.sleep(3, 'Flickering when searching')
+        self.util.sleep(pause, 'Flickering when searching')
         self.elementClick(self._search_btn)
-        self.util.sleep(3, 'Search results settling down')
+        self.util.sleep(pause, 'Search results settling down')
 
     def navigate_to_vms_page(self):
         self.hover_over_compute()
@@ -178,3 +181,29 @@ class VmsPage(BasePage):
             if not self.isElementDisplayed(element=elem):
                 return False
         return True
+
+    def select_nth_row_of_the_table(self, row_number):
+        # first row is 1. repeating because sometimes selection fails.
+        for i in range(2):
+            self.elementClick(locator=self._table_first_column.format(row_number), locatorType='xpath')
+
+    def select_multiple_rows_from_table(self, untill_row, from_row=1):
+        # from_row=1 meaning first row will be selected
+        self.select_nth_row_of_the_table(row_number=from_row)
+        for i in range(2):
+            self.elementClickShift(locator=self._table_first_column.format(untill_row), locatorType='xpath')
+
+    def reboot_vms(self):
+        self.waitForElement(self._reboot_vm_btn)
+        self.elementClick(self._reboot_vm_btn)
+        self.elementClick(self._reboot_confirmation_btn)
+
+    def clear_search_field(self):
+        self.elementClick(self._clear_search_btn, locatorType='xpath')
+
+    def search_vms_in_reboot_with_js(self):
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value=''")
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchStringInput').value='name=*L1* and status=rebootinprogress'")
+        self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
+        self.util.sleep(sec=1, info='Waiting 1 sec after search_vms_in_reboot_with_js ')
+        self.log.info('Attempted to Executed JS search_vms_in_reboot_with_js')

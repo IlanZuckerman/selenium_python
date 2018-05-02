@@ -15,8 +15,8 @@ class TestLogin(unittest.TestCase):
     vm_name = ''
     ip_172 = []
     host_name = ''
-    report_writer = ReportWriter()
 
+    report_writer = ReportWriter()
 
     @pytest.fixture(autouse=True)  # autouse makes this fixture available for all methods in scope
     def classSetup(self, oneTimeSetUp, username, password):
@@ -28,12 +28,15 @@ class TestLogin(unittest.TestCase):
         self.delta = None
         self.test_function_name = None
 
+        self.vm_name_for_reboot = '*L1*'
+
         yield
         self.__class__.report_writer.exec_report_handler(delta=self.delta, test_function_name=self.test_function_name)
 
 
     @pytest.mark.run(order=1)
     def test_invalid_login(self):
+        a = self.moshe
         self.test_function_name=inspect.stack()[0][3]
         self.lp.clickWelcomeAdminField()
         self.lp.login()
@@ -52,42 +55,22 @@ class TestLogin(unittest.TestCase):
         self.delta = self.lp.stop_timer()
         self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
-        # result2 = self.lp.verifyLoginSuccesfull()
-        # result1 = self.lp.verifyTitle()
-        # delta = self.lp.stop_timer()
-        # self.lp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
-        # self.ts.mark(result2, 'Title Verified')
-        # self.ts.markFinal('test_valid_login', result1, 'Login successful')
-
     @pytest.mark.run(order=3)
     @data(10, 50, 80, 100)
     # @data(*getCSVData('path_to_csv_file')) # to use data from csv
-    def test_reboot_bulk_new_method(self, bulk):
-        self.test_function_name=inspect.stack()[0][3]
+    def test_reboot_vms_in_bulk_of(self, bulk):
+        self.test_function_name=inspect.stack()[0][3] + str(bulk)
         self.vp.navigate_to_vms_page()
-
-        self.vp.search_for_selenium_vms('*L1* and status=up')
-        # time.sleep(5)
-
-        # select first row
-        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
-        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
-        self.vp.elementClick('//table//tbody/tr[1]/td[1]', 'xpath')
-
-        # select last row
-        last_row = self.vp.getElement('//table//tbody/tr[%s]/td[1]' % (int(bulk)), 'xpath')
-        self.vp.elementClickShift(elem=last_row)
-        self.vp.elementClickShift(elem=last_row)
-        self.vp.elementClickShift(elem=last_row)
-
-        self.vp.waitForElement('ActionPanelView_Reboot')
-        self.vp.elementClick("ActionPanelView_Reboot")
-        self.vp.elementClick('DefaultConfirmationPopupView_OnReboot')
+        self.vp.search_for_selenium_vms(self.vm_name_for_reboot + ' and status=up')
+        self.vp.select_multiple_rows_from_table(untill_row=bulk)
+        self.vp.reboot_vms()
         self.vp.start_timer()
 
-        self.vp.elementClick("//div//button[@data-tooltip-content='Clear Search']", 'xpath')
-        self.vp.execute_js_search('SearchPanelView_searchStringInput')
-        time.sleep(1)
+        self.vp.clear_search_field()
+
+        # instead, we could use this: its just the JS is faster.
+        #  self.vp.search_for_selenium_vms(self.vm_name_for_reboot + ' nd status=rebootinprogress',pause=0.3)
+        self.vp.search_vms_in_reboot_with_js()
 
         self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=30)
         print('started painting')
@@ -96,7 +79,7 @@ class TestLogin(unittest.TestCase):
                                                 timeout=120)
         self.ts.markFinal('test_reboot_bulk_vm', no_rows_result, 'vms rebooted successfully')
         self.delta = self.vp.stop_timer()
-        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=delta)
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=self.delta)
 
     @pytest.mark.run(order=4)
     def test_create_L1_vm_from_template(self):
@@ -129,7 +112,7 @@ class TestLogin(unittest.TestCase):
 
         self.ts.markFinal('test_create_vm_from_template', result, 'vm created successfully')
         self.delta = self.ts.stop_timer()
-        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
     @pytest.mark.run(order=5)
     def test_start_previosly_created_L1_vm(self):
@@ -148,7 +131,7 @@ class TestLogin(unittest.TestCase):
         first_row_painting = self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=180)
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully')
         self.delta = self.vp.stop_timer()
-        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
 
     @pytest.mark.run(order=6)
@@ -166,7 +149,7 @@ class TestLogin(unittest.TestCase):
 
         self.ts.markFinal('test_create_vm_from_template', first_row_painting, 'vm created successfully')
         self.delta = self.ts.stop_timer()
-        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
     @pytest.mark.run(order=7)
     def test_start_previosly_created_L2_vm(self):
@@ -203,7 +186,7 @@ class TestLogin(unittest.TestCase):
         self.ts.markFinal('test_start_previosly_created_vm', first_row_painting, 'vm started successfully'
                           + 'Extracted ip: ' + str(self.__class__.ip_172))
         self.delta = self.vp.stop_timer()
-        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.ts.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
     @pytest.mark.run(order=8)
     def test_create_nested_host_and_check_status(self):
@@ -220,7 +203,7 @@ class TestLogin(unittest.TestCase):
         self.ts.markFinal('test_status_of_nested_host', first_row_painting,
                           'Nested host created successfully ' + self.__class__.host_name)
         self.delta = self.vp.stop_timer()
-        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=delta)
+        self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3], delta=self.delta)
 
     # @pytest.mark.run(order=3)
     # @data(100)
