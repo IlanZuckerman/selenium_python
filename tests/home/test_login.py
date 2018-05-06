@@ -71,12 +71,10 @@ class TestLogin(unittest.TestCase):
         # instead, we could use this: its just the JS is faster.
         #  self.vp.search_for_selenium_vms(self.vm_name_for_reboot + ' nd status=rebootinprogress',pause=0.3)
         self.vp.search_vms_in_reboot_with_js()
-
-        self.lp.waitForElement("//table//tbody/tr[1]/td[2]", locatorType='xpath', timeout=30)
-        print('started painting')
+        self.vp.wait_till_results_table_starts_painting()
         # wait till there is nothing to show
-        no_rows_result = self.lp.waitForElement("//tbody//div[text()='No items to display']", locatorType='xpath',
-                                                timeout=120)
+        no_rows_result = self.vp.wait_till_NoItemsToDisplay_appears()
+
         self.ts.markFinal('test_reboot_bulk_vm', no_rows_result, 'vms rebooted successfully')
         self.delta = self.vp.stop_timer()
         self.vp.write_delta_to_csv(test_function_name=inspect.stack()[0][3] + str(bulk), delta=self.delta)

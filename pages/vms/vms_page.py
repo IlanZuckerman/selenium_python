@@ -50,6 +50,7 @@ class VmsPage(BasePage):
     # table elements
     _table_first_column = '//table//tbody/tr[{0}]/td[1]'  # used for clicking the row. formatted to use it in multiple rows
     _vm_name_field = "//table//tbody/tr[1]//td[3]//a[contains(text(),'{0}')]"  # {0} used for inserting vm name
+    _no_items_to_display = "//tbody//div[text()='No items to display']"
 
     # dashboard iframe
     _dashboard_iframe = "//div//iframe"
@@ -207,3 +208,10 @@ class VmsPage(BasePage):
         self.driver.execute_script("document.getElementById('SearchPanelView_searchButton').click()")
         self.util.sleep(sec=1, info='Waiting 1 sec after search_vms_in_reboot_with_js ')
         self.log.info('Attempted to Executed JS search_vms_in_reboot_with_js')
+
+    def wait_till_results_table_starts_painting(self):
+        self.waitForElement(self._table_first_column.format('1'), locatorType='xpath', timeout=30)
+        print('started painting')
+
+    def wait_till_NoItemsToDisplay_appears(self):
+        return self.waitForElement(self._no_items_to_display, locatorType='xpath', timeout=120)

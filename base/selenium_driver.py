@@ -269,9 +269,13 @@ class SeleniumDriver():
     def scroll_down_till_element_in_view(self, element):
         self.driver.execute_script("arguments[0].scrollIntoView(true);",element)
 
-
+# TODO: get rid of this (there is class ReportWriter)
     def write_delta_to_csv(self, test_function_name, delta):
-        fileName = test_function_name + '.' + str(round(time.time() * 1000)) + '.csv'
+        """
+        creates file per test with duration time string in it
+        """
+        date_time_str = time.strftime("%d-%m-%y_%H-%M-%S")
+        fileName = test_function_name + '.' + date_time_str + '.csv'
         timeMeasureDir = '../time_measurements/'
         relativeFileName = timeMeasureDir + fileName.replace(" ", "")
         currentDirectory = os.path.dirname(__file__)
