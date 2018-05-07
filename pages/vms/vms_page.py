@@ -37,6 +37,7 @@ class VmsPage(BasePage):
     _reboot_vm_btn = 'ActionPanelView_Reboot'
     _reboot_confirmation_btn = 'DefaultConfirmationPopupView_OnReboot'
     _clear_search_btn = "//div//button[@data-tooltip-content='Clear Search']"
+    _run_vm_btn = "//div[@id='ActionPanelView_Run']/button[1]"
 
     # new hosts dialog
     _host_cluster_dropDown_btn = "//div[@id='HostPopupView_cluster']//button"
@@ -70,7 +71,7 @@ class VmsPage(BasePage):
         self.util.sleep(4, 'Create vm Dialog settle down')
         tmp = self.waitForElement(self._template_dropDown, 'xpath')
         self.elementClick(self._template_dropDown, 'xpath')
-        self.elementClick("//*[contains(text(), '%s')]" % template_name, 'xpath')
+        self.elementClick("//td[contains(text(), '%s')]" % template_name, 'xpath')
 
     def enter_vm_name(self):
         self.name = 'vm_selenium' + str(round(time.time() * 1000))
@@ -215,3 +216,7 @@ class VmsPage(BasePage):
 
     def wait_till_NoItemsToDisplay_appears(self):
         return self.waitForElement(self._no_items_to_display, locatorType='xpath', timeout=120)
+
+    def click_run_vm_btn(self):
+        self.waitForElement(self._run_vm_btn, 'xpath')
+        self.elementClick(self._run_vm_btn, 'xpath')
