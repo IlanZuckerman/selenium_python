@@ -1,6 +1,7 @@
 from base.basepage import BasePage
 import utilities.custom_logger as cl
 import logging, time
+from selenium.webdriver import ActionChains
 
 class LoginPage(BasePage):
 
@@ -47,3 +48,7 @@ class LoginPage(BasePage):
 
     def verifyTitle(self):
         return self.verifyPageTitle('Red Hat Virtualization Manager Web Administration')
+
+    def hover_over_login(self):
+        element_to_hover = self.getElement(self._submit_btn, locatorType='xpath')
+        ActionChains(self.driver).move_to_element(element_to_hover).perform()

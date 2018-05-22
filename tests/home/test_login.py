@@ -41,10 +41,13 @@ class TestLogin(unittest.TestCase):
 
     @pytest.mark.run(order=1)
     def test_invalid_login(self):
-        a = self.moshe
         self.test_function_name=inspect.stack()[0][3]
         self.lp.clickWelcomeAdminField()
         self.lp.login()
+
+        # self.lp.hover_over_login()
+        # result = self.lp.waitForMousePointerToChangeToPointer('//button[@type="submit"]', 'xpath')
+
         result = self.lp.verifyLoginFailed()
         self.ts.markFinal('test_invalid_login', result, 'Invalid login went good')
 

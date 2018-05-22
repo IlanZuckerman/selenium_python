@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
 import utilities.custom_logger as cl
+from utilities.cursor_changes_to_pointer import CursorChangesFromWaiting
 
 
 class SeleniumDriver():
@@ -19,6 +20,7 @@ class SeleniumDriver():
         self.driver = driver
         self.start_time = 0
         self.end_time = 0
+        self.cursor_changes_to_pointer = CursorChangesFromWaiting
 
 
     def screenShot(self, resultMessage):
@@ -256,6 +258,29 @@ class SeleniumDriver():
         except:
             self.log.warn("Element %s  %s NOT APPEARED on the web page" % (locator, locatorType))
             print_stack()
+
+    def waitForMousePointerToChangeToPointer(self, locator, locatorType="id", timeout=10, pollFrequency=0.5):
+
+        def cursorChangesToPointer():
+            cursor_val = self.getElement(locator, locatorType).value_of_css_property("cursor")
+            return cursor_val == "not-allowed"
+
+        pointer = None
+        try:
+            byType = self.getByType(locatorType)
+            self.log.info("Waiting for maximum :: " + str(timeout) +
+                  " :: seconds for mouse pointer to change")
+            wait = WebDriverWait(self.driver, timeout=timeout, poll_frequency=pollFrequency,
+                                 ignored_exceptions=[NoSuchElementException,
+                                                     ElementNotVisibleException,
+                                                     ElementNotSelectableException])
+
+            wait.until(self.cursor_changes_to_pointer(self.driver))
+            self.log.info("Element %s  %s CHANGED its cursor property to 'pointer'" % (locator, locatorType))
+        except:
+            self.log.warn("Element %s  %s DID NOT CHANGE its cursor property to 'pointer'" % (locator, locatorType))
+            print_stack()
+        return pointer
 
     def switch_to_iframe(self, locatorType="id", locator=""):
         iframe_element = self.getElement(locator, locatorType)
